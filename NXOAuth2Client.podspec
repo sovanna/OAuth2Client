@@ -1,6 +1,6 @@
 Pod::Spec.new do |s|
   s.name     = 'NXOAuth2Client'
-  s.version  = '1.2.8'
+  s.version  = '1.2.9'
   s.license  = {
     :type => 'BSD',
     :text => <<-LICENSETEXT
@@ -33,9 +33,9 @@ Pod::Spec.new do |s|
     LICENSETEXT
   }
   s.summary  = 'Client library for OAuth2 (currently built against draft 10 of the OAuth2 spec) but can support several drafts.'
-  s.homepage = 'https://github.com/nxtbgthng/OAuth2Client'
-  s.author   = { 'nxtbgthng' => 'team@nxtbgthng.com'}
-  s.source   = { :git => 'https://github.com/nxtbgthng/OAuth2Client.git', :tag => "v#{s.version}" }
+  s.homepage = 'https://github.com/sovanna/OAuth2Client'
+  s.authors   = { 'nxtbgthng' => 'team@nxtbgthng.com', 'Sovanna' => 'sovanna@sasr.io'}
+  s.source   = { :git => 'https://github.com/sovanna/OAuth2Client.git', :tag => "v#{s.version}" }
   s.source_files = 'NXOAuth2Account+Private.h', 'Sources/', 'Sources/OAuth2Client/'
   s.frameworks = 'Security'
   s.requires_arc = true
