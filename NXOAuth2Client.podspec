@@ -39,4 +39,5 @@ Pod::Spec.new do |s|
   s.source_files = 'NXOAuth2Account+Private.h', 'Sources/', 'Sources/OAuth2Client/'
   s.frameworks = 'Security'
   s.requires_arc = true
+  s.platform = :ios, '7.0'
 end
