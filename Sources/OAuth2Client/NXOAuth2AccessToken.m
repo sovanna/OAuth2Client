@@ -55,12 +55,12 @@
     NSString *anAccessToken = [jsonDict objectForKey:@"access_token"];
     NSString *aRefreshToken = [jsonDict objectForKey:@"refresh_token"];
     NSString *scopeString = [jsonDict objectForKey:@"scope"];
-    
+
     // if the response overrides token_type we take it from the response
     if ([jsonDict objectForKey:@"token_type"]) {
         tokenType = [jsonDict objectForKey:@"token_type"];
     }
-    
+
     NSSet *scope = nil;
     if (scopeString && ![scopeString isEqual:[NSNull null]]) {
         scope = [NSSet setWithArray:[scopeString componentsSeparatedByCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]]];
@@ -117,7 +117,7 @@
     if (anAccessToken == nil) {
         return nil;
     }
-    
+
     self = [super init];
     if (self) {
         accessToken  = [anAccessToken copy];
@@ -194,12 +194,12 @@
 - (instancetype)initWithCoder:(NSCoder *)aDecoder
 {
     NSString *decodedAccessToken = [aDecoder decodeObjectForKey:@"accessToken"];
-    
+
     // a token object without an actual token is not what we want!
     if (decodedAccessToken == nil) {
         return nil;
     }
-    
+
     self = [super init];
     if (self) {
         accessToken = [decodedAccessToken copy];
@@ -218,7 +218,7 @@
 + (NSString *)serviceNameWithProvider:(NSString *)provider;
 {
     NSString *appName = [[NSBundle mainBundle] bundleIdentifier];
-    
+
     return [NSString stringWithFormat:@"%@::OAuth2::%@", appName, provider];
 }
 
@@ -233,22 +233,22 @@
                                   serviceName, kSecAttrService,
                                   kCFBooleanTrue, kSecReturnAttributes,
                                   nil];
-    
+
 #ifndef TARGET_IPHONE_SIMULATOR
     if (accessGroup != nil) {
         [query setObject:accessGroup forKey:(__bridge NSString *)kSecAttrAccessGroup];
     }
 #endif
-    
+
     CFTypeRef cfResult = nil;
     OSStatus status = SecItemCopyMatching((__bridge CFDictionaryRef)query, &cfResult);
     result = (__bridge_transfer NSDictionary *)cfResult;
-    
+
     if (status != noErr) {
         NSAssert1(status == errSecItemNotFound, @"unexpected error while fetching token from keychain: %d", (int)status);
         return nil;
     }
-    
+
     return [NSKeyedUnarchiver unarchiveObjectWithData:[result objectForKey:(__bridge NSString *)kSecAttrGeneric]];
 }
 
@@ -262,13 +262,13 @@
                                   @"OAuth 2 Access Token", kSecAttrLabel,
                                   data, kSecAttrGeneric,
                                   nil];
-    
+
 #ifndef TARGET_IPHONE_SIMULATOR
     if (accessGroup != nil) {
         [query setObject:accessGroup forKey:(__bridge NSString *)kSecAttrAccessGroup];
     }
 #endif
-    
+
     [self removeFromDefaultKeychainWithServiceProviderName:provider withAccessGroup:accessGroup];
     OSStatus __attribute__((unused)) err = SecItemAdd((__bridge CFDictionaryRef)query, NULL);
     NSAssert1(err == noErr, @"error while adding token to keychain: %d", (int)err);
@@ -281,13 +281,13 @@
                            (__bridge NSString *)kSecClassGenericPassword, kSecClass,
                            serviceName, kSecAttrService,
                            nil];
-    
+
 #ifndef TARGET_IPHONE_SIMULATOR
     if (accessGroup != nil) {
         [query setObject:accessGroup forKey:(__bridge NSString *)kSecAttrAccessGroup];
     }
 #endif
-    
+
     OSStatus __attribute__((unused)) err = SecItemDelete((__bridge CFDictionaryRef)query);
     NSAssert1((err == noErr || err == errSecItemNotFound), @"error while deleting token from keychain: %d", (int)err);
 }
@@ -297,10 +297,10 @@
 + (instancetype)tokenFromDefaultKeychainWithServiceProviderName:(NSString *)provider withAccessGroup:(NSString *)accessGroup;
 {
     NSString *serviceName = [[self class] serviceNameWithProvider:provider];
-    
+
     SecKeychainItemRef item = nil;
     OSStatus err = SecKeychainFindGenericPassword(NULL,
-                                                  strlen([serviceName UTF8String]),
+                                                  (int)(strlen([serviceName UTF8String])),
                                                   [serviceName UTF8String],
                                                   0,
                                                   NULL,
@@ -311,22 +311,22 @@
         NSAssert1(err == errSecItemNotFound, @"unexpected error while fetching token from keychain: %d", err);
         return nil;
     }
-    
+
     // from Advanced Mac OS X Programming, ch. 16
     UInt32 length;
     char *password;
     NSData *result = nil;
     SecKeychainAttribute attributes[8];
     SecKeychainAttributeList list;
-    
+
     attributes[0].tag = kSecAccountItemAttr;
     attributes[1].tag = kSecDescriptionItemAttr;
     attributes[2].tag = kSecLabelItemAttr;
     attributes[3].tag = kSecModDateItemAttr;
-    
+
     list.count = 4;
     list.attr = attributes;
-    
+
     err = SecKeychainItemCopyContent(item, NULL, &list, &length, (void **)&password);
     if (err == noErr) {
         if (password != NULL) {
@@ -347,16 +347,16 @@
     [self removeFromDefaultKeychainWithServiceProviderName:provider withAccessGroup:accessGroup];
     NSString *serviceName = [[self class] serviceNameWithProvider:provider];
     NSData *data = [NSKeyedArchiver archivedDataWithRootObject:self];
-    
+
     OSStatus __attribute__((unused))err = SecKeychainAddGenericPassword(NULL,
-                                                                        strlen([serviceName UTF8String]),
+                                                                        (int)(strlen([serviceName UTF8String])),
                                                                         [serviceName UTF8String],
                                                                         0,
                                                                         NULL,
-                                                                        [data length],
+                                                                        (int)([data length]),
                                                                         [data bytes],
                                                                         NULL);
-    
+
     NSAssert1(err == noErr, @"error while adding token to keychain: %d", err);
 }
 
@@ -365,7 +365,7 @@
     NSString *serviceName = [[self class] serviceNameWithProvider:provider];
     SecKeychainItemRef item = nil;
     OSStatus err = SecKeychainFindGenericPassword(NULL,
-                                                  strlen([serviceName UTF8String]),
+                                                  (int)(strlen([serviceName UTF8String])),
                                                   [serviceName UTF8String],
                                                   0,
                                                   NULL,
